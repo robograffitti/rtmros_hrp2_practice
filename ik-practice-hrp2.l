@@ -1,18 +1,20 @@
 ;; robot setup
 (defun practice-setup
   ()
-  ; (setup-model-for-hrp2) ; old
+  ;; (setup-model-for-hrp2) ; old
   (hrp2jsk-init) ; create instance
   (objects (list *hrp2jsk*)) ; show in IRTViewer
-  (send *hrp2* :reset-pose)
-  (send *hrp2* :fix-leg-to-coords (make-coords))
+  ;; hrp2 -> hrp2jsk
+  (send *hrp2jsk* :fix-leg-to-coords (make-coords))
+  (send *hrp2jsk* :reset-pose)
+  (send *irtviewer* :draw-objects)
 
   ;; environmet setup
-  (setq *valve* (instance valve :init)) ; make valve
-  (objects (list *hrp2* *valve*)) ; view models
-  (send *valve* :locate #f(700 0 1000) :world) ; translate
-  (send *valve* :orient (deg2rad -90) :y :world) ; rotate
-  (send *pickview* :draw-objects) ; update view instead of click
+  ; (setq *valve* (instance valve :init)) ; make valve
+  ; (objects (list *hrp2jsk* *valve*)) ; view models
+  ; (send *valve* :locate #f(700 0 1000) :world) ; translate
+  ; (send *valve* :orient (deg2rad -90) :y :world) ; rotate
+  ;; (send *pickview* :draw-objects) ; old
 )
 ;(practice-setup)
 
