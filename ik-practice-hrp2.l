@@ -1,7 +1,9 @@
 ;; robot setup
 (defun practice-setup
   ()
-  (setup-model-for-hrp2) ;; make hrp2
+  ; (setup-model-for-hrp2) ; old
+  (hrp2jsk-init) ; create instance
+  (objects (list *hrp2jsk*)) ; show in IRTViewer
   (send *hrp2* :reset-pose)
   (send *hrp2* :fix-leg-to-coords (make-coords))
 
