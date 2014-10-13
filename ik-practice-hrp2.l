@@ -1,3 +1,5 @@
+;; loading 
+(load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2jsk-interface.l")
 ;; robot setup
 (defun practice-setup
   ()
@@ -22,9 +24,10 @@
 ;; wait input key
 (read-line)
 (warn "Call practice-setup function.
-~%practice-setup~%function-name~%ik-practice
-~%ik-practice-1~%ik-practice-2~%ik-practice-3
-~%y-tanaka-ik-practice-1~%")
+~%practice-setup~%function-name
+~%ik-practice~%ik-practice-1~%ik-practice-2~%ik-practice-3~%y-tanaka-ik-practice-1~%")
+(warn "~%To send angle vector from this interface to a robot in real or sim,
+~%(send *ri* :angle-vector (send *hrp2jsk* :angle-vector))~%")
 
 ;; methods of pose
 ; :reset-pose :reset-manip-pose :init-pose 
@@ -41,32 +44,31 @@
 ;; IK practice (Inverse Kinematics)
 (defun ik-practice
   ()
+)
+
+;; hpr2-ik-practice-1
+(defun ik-practice-1
+  ()
   (send *hrp2jsk* ; hrp2 -> hrp2jsk
 	:rarm ; right arm
 	:inverse-kinematics ; inverse-kinematics
 	(make-coords :pos #f(250 -300 1000)) ; make coords
 	:rotational-axis nil) ; rotational-axis: yaw-pitch-roll
   (send *irtviewer* :draw-objects)
-  ;; send angle-vector to a robot in real or sim
-  ;; (send *ri* :angle-vector (send *hrp2jsk* :angle-vector))
+  ; send angle-vector to a robot in real or sim
+  ; (send *ri* :angle-vector (send *hrp2jsk* :angle-vector))
 )
-
-;; hpr2-ik-practice-1
-;; send series of IK and move arm on x-axis
-(defun ik-practice-1
-  ()
-)
-
 ;; hrp2jsk-ik-practice-2
+; send series of IK and move arm on x-axis
 (defun ik-practice-2
   ()
   (dolist ; loop for list ; similar to each-statement of Ruby
       (x (list 250 300 350 400 450 400 350 300 250)) ; list as argument
-    ;; robot, part, action, pos
+    ; robot, part, action, pos
     (send *hrp2jsk* :rarm :inverse-kinematics 
 	  (make-coords :pos (float-vector x -300 1000)))
     (send *irtviewer* :draw-objects)
-    ;; (send *ri* :angle-vector (send *hrp2jsk* :angle-vector))
+    (send *ri* :angle-vector (send *hrp2jsk* :angle-vector))
     (unix:usleep (* 200 1000))
     ))
 
@@ -84,22 +86,25 @@
                          :rotational-axis nil)
 	    (send *irtviewer* :draw-objects)
 	    (unix:usleep (* 200 1000))
-            ;; (send *ri* :angle-vector (send *hrp2jsk* :angle-vector))
+            ; (send *ri* :angle-vector (send *hrp2jsk* :angle-vector))
 	    (when (= x fin-x) ; evaluate 2nd arg if x=fin-x
 	      (return)) ; exit from while loop
-	    (setq x (+ x x-diff))
+	    (setq x (+ x x-diff)) ; assign updated value for x
 	    )))
 
 ;; unix:command-name ; use unix command from eus
-(unix:usleep (* 200 1000)) ; unix sleep 1000 micro sec * 200 = 0.2sec
+; (unix:usleep (* 200 1000)) ; unix sleep 1000 micro sec * 200 = 0.2sec
+
+(defun reset
+  ()
+  (send *hrp2jsk* :reset-pose)
+  (send *irtviewer* :draw-objects)
+)
 
 ;; practice
 (defun y-tanaka-ik-practice-1 
   () ; arguments
-  (setup-model-for-hrp2jsk) ; make hrp2jsk
-  (send *hrp2jsk* :reset-pose)
-  (send *hrp2jsk* :fix-leg-to-coords (make-coords))
-
+  (practice-setup)
   ; set up environment
 
   (let* ((start-x 250) ; declaration of local variable
@@ -110,6 +115,7 @@
       (send *hrp2jsk* :rarm :inverse-kinematics
 	    (make-coords :pos (float-vector x -300 1000))
 	    :rotational-axis nil)
+      (send *hrp2jsk* :look-at-hand :rarm) ;
       (send *irtviewer* :draw-objects)
       (unix:usleep (* 200 1000))
       (when (= x fin-x) ; evaluate 2nd arg if x=fin-x
