@@ -95,7 +95,7 @@
 ;; unix:command-name ; use unix command from eus
 ; (unix:usleep (* 200 1000)) ; unix sleep 1000 micro sec * 200 = 0.2sec
 
-(defun reset
+(defun practice-reset
   ()
   (send *hrp2jsk* :reset-pose)
   (send *irtviewer* :draw-objects)
