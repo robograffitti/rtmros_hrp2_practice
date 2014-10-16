@@ -1,5 +1,16 @@
 ;; loading 
 (load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2jsk-interface.l")
+;; robot preparation movement
+(defun prep-move
+  ()
+  (send *hrp2jsk* :reset-manip-pose)
+  (send *irtviewer* :draw-objects)
+  (unix:usleep (* 1000 1000))
+  (send *hrp2jsk* :reset-pose)
+  (send *irtviewer* :draw-objects)
+  ;; (unix:usleep (* 1000 1000))
+  )
+
 ;; robot setup
 (defun practice-setup
   ()
@@ -10,7 +21,17 @@
   (send *hrp2jsk* :fix-leg-to-coords (make-coords))
   (send *hrp2jsk* :reset-pose)
   (send *irtviewer* :draw-objects)
-
+  (unix:usleep (* 200 1000)) ; 0.2 sec
+  (prep-move)
+  ;; (send *hrp2jsk* :reset-manip-pose)
+  ;; (send *irtviewer* :draw-objects)
+  ;; (unix:usleep (* 200 1000))
+  ;; (send *hrp2jsk* :reset-pose)
+  ;; (send *irtviewer* :draw-objects)
+  ;; (unix:usleep (* 200 1000))
+  ;; (send *hrp2jsk* :init-pose)
+  ;; (send *irtviewer* :draw-objects)
+  ;; (unix:usleep (* 200 1000))
   ;; environmet setup
   ; (setq *valve* (instance valve :init)) ; make valve
   ; (objects (list *hrp2jsk* *valve*)) ; view models
