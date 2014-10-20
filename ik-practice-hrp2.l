@@ -40,6 +40,8 @@
   ; (send *valve* :locate #f(700 0 1000) :world) ; translate
   ; (send *valve* :orient (deg2rad -90) :y :world) ; rotate
   ;; (send *pickview* :draw-objects) ; old
+
+  ;; new environment setup
   )
 
 ;; Error Message
