@@ -1,3 +1,0 @@
-(load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2w-interface.l")
-(hrp2w-init)
-(objects *hrp2w*)
