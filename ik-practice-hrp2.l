@@ -1,5 +1,18 @@
 ;; loading 
 (load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2jsk-interface.l")
+;; robot preparation movement
+(defun prep-move
+  ()
+  (send *hrp2jsk* :reset-manip-pose)
+  (send *irtviewer* :draw-objects)
+  (send *ri* :angle-vector (send *hrp2jsk* :angle-vector))
+  (unix:usleep (* 1000 1000))
+  (send *hrp2jsk* :reset-pose)
+  (send *irtviewer* :draw-objects)
+  (send *ri* :angle-vector (send *hrp2jsk* :angle-vector))
+  ;; (unix:usleep (* 1000 1000))
+  )
+
 ;; robot setup
 (defun practice-setup
   ()
@@ -10,13 +23,25 @@
   (send *hrp2jsk* :fix-leg-to-coords (make-coords))
   (send *hrp2jsk* :reset-pose)
   (send *irtviewer* :draw-objects)
-
+  (unix:usleep (* 200 1000)) ; 0.2 sec
+  (prep-move)
+  ;; (send *hrp2jsk* :reset-manip-pose)
+  ;; (send *irtviewer* :draw-objects)
+  ;; (unix:usleep (* 200 1000))
+  ;; (send *hrp2jsk* :reset-pose)
+  ;; (send *irtviewer* :draw-objects)
+  ;; (unix:usleep (* 200 1000))
+  ;; (send *hrp2jsk* :init-pose)
+  ;; (send *irtviewer* :draw-objects)
+  ;; (unix:usleep (* 200 1000))
   ;; environmet setup
   ; (setq *valve* (instance valve :init)) ; make valve
   ; (objects (list *hrp2jsk* *valve*)) ; view models
   ; (send *valve* :locate #f(700 0 1000) :world) ; translate
   ; (send *valve* :orient (deg2rad -90) :y :world) ; rotate
   ;; (send *pickview* :draw-objects) ; old
+
+  ;; new environment setup
   )
 
 ;; Error Message
@@ -38,13 +63,11 @@
 ;; define function
 (defun function-name
   () ; arguments
-  (warn "This is a function.~%")
-)
+  (warn "This is a function.~%"))
 
 ;; IK practice (Inverse Kinematics)
 (defun ik-practice
-  ()
-)
+  ())
 
 ;; hpr2-ik-practice-1
 (defun ik-practice-1
@@ -98,8 +121,7 @@
 (defun practice-reset
   ()
   (send *hrp2jsk* :reset-pose)
-  (send *irtviewer* :draw-objects)
-)
+  (send *irtviewer* :draw-objects))
 
 ;; practice
 (defun y-tanaka-ik-practice-1 
@@ -115,20 +137,25 @@
       (send *hrp2jsk* :rarm :inverse-kinematics
 	    (make-coords :pos (float-vector x -300 1000))
 	    :rotational-axis nil)
-      (send *hrp2jsk* :look-at-hand :rarm) ;
+      (send *hrp2jsk* :look-at-hand :rarm)
       (send *irtviewer* :draw-objects)
+      (send *ri* :angle-vector (send *hrp2jsk* :angle-vector))
       (unix:usleep (* 200 1000))
       (when (= x fin-x) ; evaluate 2nd arg if x=fin-x
 	(return)) ; exit from while loop
       (setq x (+ x x-diff))
-      ))
-  )
-)
+      )))
 
 ;; memo
 ; (function)
+; (quote ) -> '
+; :keyword キーワード引数,関数の動作を変更できる．
+; send関数にキーワードを付加している．
+; (send *object-name* :keyword (k e y w o r d a r g s))
+; シンボル：値比較で等しくなる
+; つまり同じメモリ領域の値にセットされている
 ; let, let*の違い
-; *instance*
+; *instance*b
 ; :method
 ; defvar, setqの違い
 ; :copy-worldcoordsの機能
