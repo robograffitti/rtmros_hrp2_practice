@@ -1,6 +1,5 @@
 #!/usr/bin/env roseus
 (load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2w-interface.l") ; eusLisp robot interface
-;; eusLisp practice
 
 ;; methods of pose
 ; :reset-pose :reset-manip-pose :init-pose
@@ -20,14 +19,17 @@
   ; (load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2w-interface.l")
   (hrp2w-init)
   (objects *hrp2w*)
+  ;(send *hrp2w* :init-pose)
+  ;(send *irtviewer* :draw-objects) ; update view instead of click
   (send *hrp2w* :reset-pose)
+  ;(send *irtviewer* :draw-objects) ; update view instead of click
   (send *hrp2w* :reset-manip-pose)
   (send *hrp2w* :fix-leg-to-coords (make-coords))
   ; (valve-setup)
   (send *irtviewer* :draw-objects) ; update view instead of click
 )
 
-(defun test-joint-command
+(defun joint-command
   ()
   (send *ri* :angle-vector (send *hrp2w* :angle-vector) 3000)
   (send *ri* :wait-interpolation))
@@ -53,7 +55,7 @@
 	:rarm ; right arm
 	:inverse-kinematics ; inverse-kinematics
 	(make-coords :pos (send *co* :pos)) ; make coords
-	:rotational-axis nil)) ; rotational-axis: yaw-pitch-roll
+	:rotational-axis #f((deg2rad -90) 0 0))) ; rotational-axis: yaw-pitch-roll
 
 (defun neck-move
   ()
