@@ -1,9 +1,11 @@
+#!/usr/bin/env roseus
+(load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2w-interface.l") ; eusLisp robot interface
 ;; eusLisp practice
 
 ;; methods of pose
-; :reset-pose :reset-manip-pose :init-pose 
+; :reset-pose :reset-manip-pose :init-pose
 ; :reset-manip-pose-arm-avoid ;; give :larm or :rarm
-; :reset-manip-pose-rarm-avoid ;; not reset :rarm 
+; :reset-manip-pose-rarm-avoid ;; not reset :rarm
 ; :reset-manip-pose-larm-avoid ;; not reset :larm
 
 ;; define function
@@ -15,12 +17,20 @@
 ;; robot setup
 (defun practice-setup
   ()
-  (setup-model-for-hrp2w) ;; make hrp2w
+  ; (load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2w-interface.l")
+  (hrp2w-init)
+  (objects *hrp2w*)
   (send *hrp2w* :reset-pose)
+  (send *hrp2w* :reset-manip-pose)
   (send *hrp2w* :fix-leg-to-coords (make-coords))
-  ;; (valve-setup)
+  ; (valve-setup)
   (send *irtviewer* :draw-objects) ; update view instead of click
 )
+
+(defun test-joint-command
+  ()
+  (send *ri* :angle-vector (send *hrp2w* :angle-vector) 3000)
+  (send *ri* :wait-interpolation))
 
 (defun valve-setup
   () ;; old environmet setup for valve
@@ -30,21 +40,26 @@
   (send *valve* :orient (deg2rad -90) :y :world) ; rotate
 )
 
-(warn "~%push any key to start~%") ; Error Message
-(read-line) ; wait input key
-(warn "Call practice-setup function.
-~%practice-setup~%function-name~%ik-practice
-~%ik-practice-1~%ik-practice-2~%ik-practice-3
-~%y-tanaka-ik-practice-1~%")
+(defun get-co
+  ()
+  (setq *co* (send (send *hrp2w* :rarm :end-coords) :copy-worldcoords)))
 
 ;; IK practice (Inverse Kinematics)
 (defun ik-practice
   ()
+  (setq *co* (send (send *hrp2w* :rarm :end-coords) :copy-worldcoords))
+  (send *co* :translate #f(250 0 0)) ; needs constrants for y and z
   (send *hrp2w* ; hrp2w
 	:rarm ; right arm
 	:inverse-kinematics ; inverse-kinematics
-	(make-coords :pos #f(250 -300 1000)) ; make coords
+	(make-coords :pos (send *co* :pos)) ; make coords
 	:rotational-axis nil)) ; rotational-axis: yaw-pitch-roll
+
+(defun neck-move
+  ()
+  (send *hrp2w* :head :look-at (send *hrp2w* :rarm :end-coords :pos))
+  (send *hrp2w* :head :neck-p :joint-angle 0.0)
+  )
 
 ;; hpr2-ik-practice-1
 ;; send series of IK and move arm on x-axis
@@ -82,6 +97,14 @@
 	    (setq x (+ x x-diff))
 	    ))))
 
+;; show instruction
+(warn "~%push any key to start~%") ; Error Message
+(read-line) ; wait input key
+(warn "Call practice-setup function.
+~%practice-setup~%function-name~%ik-practice
+~%ik-practice-1~%ik-practice-2~%ik-practice-3
+~%y-tanaka-ik-practice-1~%")
+
 ;; unix:command-name ; use unix command from eus
 (unix:usleep (* 200 1000)) ; unix sleep 1000 micro sec * 200 = 0.2sec
 
@@ -93,7 +116,6 @@
   (send *hrp2w* :fix-leg-to-coords (make-coords))
 
   ; set up environment
-
   (let* ((start-x 250) ; declaration of local variable
 	 (fin-x 600) ; only valid in this body
 	 (x-diff 50)
@@ -118,6 +140,7 @@
 ; :method
 ; defvar, setqの違い
 ; :copy-worldcoordsの機能
+; ikを解く時,world-coords
 ; make-coordsの使い方
 ; :rotation-axisの使い方
 ; xtionで点群表示
