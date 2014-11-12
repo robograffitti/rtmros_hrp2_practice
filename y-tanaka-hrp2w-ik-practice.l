@@ -1,25 +1,4 @@
-;; robot setup
-(defun practice-setup
-  ()
-  (setup-model-for-hrp2w) ;; make hrp2w
-  (send *hrp2w* :reset-pose)
-  (send *hrp2w* :fix-leg-to-coords (make-coords))
-
-  ;; old environmet setup for valve
-  ;; (setq *valve* (instance valve :init)) ; make valve
-  ;; (objects (list *hrp2w* *valve*)) ; view models
-  ;; (send *valve* :locate #f(700 0 1000) :world) ; translate
-  ;; (send *valve* :orient (deg2rad -90) :y :world) ; rotate
-
-  (send *irtviewer* :draw-objects) ; update view instead of click
-)
-
-(warn "~%push any key to start~%") ; Error Message
-(read-line) ; wait input key
-(warn "Call practice-setup function.
-~%practice-setup~%function-name~%ik-practice
-~%ik-practice-1~%ik-practice-2~%ik-practice-3
-~%y-tanaka-ik-practice-1~%")
+;; eusLisp practice
 
 ;; methods of pose
 ; :reset-pose :reset-manip-pose :init-pose 
@@ -32,6 +11,31 @@
   () ; arguments
   (warn "This is a function.~%")
 )
+
+;; robot setup
+(defun practice-setup
+  ()
+  (setup-model-for-hrp2w) ;; make hrp2w
+  (send *hrp2w* :reset-pose)
+  (send *hrp2w* :fix-leg-to-coords (make-coords))
+  ;; (valve-setup)
+  (send *irtviewer* :draw-objects) ; update view instead of click
+)
+
+(defun valve-setup
+  () ;; old environmet setup for valve
+  (setq *valve* (instance valve :init)) ; make valve
+  (objects (list *hrp2w* *valve*)) ; view models
+  (send *valve* :locate #f(700 0 1000) :world) ; translate
+  (send *valve* :orient (deg2rad -90) :y :world) ; rotate
+)
+
+(warn "~%push any key to start~%") ; Error Message
+(read-line) ; wait input key
+(warn "Call practice-setup function.
+~%practice-setup~%function-name~%ik-practice
+~%ik-practice-1~%ik-practice-2~%ik-practice-3
+~%y-tanaka-ik-practice-1~%")
 
 ;; IK practice (Inverse Kinematics)
 (defun ik-practice
