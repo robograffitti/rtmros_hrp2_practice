@@ -10,7 +10,7 @@
   (objects (list *hrp2* *valve*)) ; view models
   (send *valve* :locate #f(700 0 1000) :world) ; translate
   (send *valve* :orient (deg2rad -90) :y :world) ; rotate
-  (send *pickview* :draw-objects) ; update view instead of click
+  (send *irtviewer* :draw-objects) ; update view instead of click
 )
 ;(practice-setup)
 
@@ -55,9 +55,9 @@
   ()
   (dolist ; loop for list ; similar to each-statement of Ruby
       (x (list 250 300 350 400 350 300 250)) ; list as argument
-    (send *hrp2* :rarm :inverse-kinematics 
-	  (make-coords :pos (float-vector x -300 1000)))
-    (send *pickview* :draw-objects)
+    (send *hrp2* :rarm :inverse-kinematics
+	  (make-coords :pos (float-vector x -300 1000)) :debug-view t)
+    (send *irtviewer* :draw-objects)
     (unix:usleep (* 200 1000))
     ))
 
@@ -73,7 +73,7 @@
       (send *hrp2* :rarm :inverse-kinematics
 	    (make-coords :pos (float-vector x -300 1000)))
                          :rotational-axis nil)
-	    (send *pickview* :draw-objects)
+	    (send *irtviewer* :draw-objects)
 	    (unix:usleep (* 200 1000))
 	    (when (= x fin-x) ; evaluate 2nd arg if x=fin-x
 	      (return)) ; exit from while loop
@@ -100,7 +100,7 @@
       (send *hrp2* :rarm :inverse-kinematics
 	    (make-coords :pos (float-vector x -300 1000))
 	    :rotational-axis nil)
-      (send *pickview* :draw-objects)
+      (send *irtviewer* :draw-objects)
       (unix:usleep (* 200 1000))
       (when (= x fin-x) ; evaluate 2nd arg if x=fin-x
 	(return)) ; exit from while loop
