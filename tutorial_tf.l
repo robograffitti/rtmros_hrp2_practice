@@ -40,11 +40,13 @@
  (send *rarm-end* :locate (send *ik-target* :pos) :world)
  (send *rarm-end* :translate #f(0 -100 0))
  (format t "~A~%" *rarm-end*)
+
+ ;; Add 1 more to check *ramr-end* is t or nil
  (when (send *hrp2w* :rarm :inverse-kinematics *rarm-end*
              :rotational-axis nil :debug-view t :torso nil
              :link-list (send *hrp2w* :link-list
                               (send *hrp2w* :rarm :end-coords :parent)
-                              (car (send *hrp2w* :torso :links))))(
+                              (car (send *hrp2w* :torso :links))))
    (return nil))
  (ros::spin-once)
  )
