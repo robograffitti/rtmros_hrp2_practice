@@ -20,16 +20,16 @@
   (hrp2w-init)
   (objects *hrp2w*)
   ;(send *hrp2w* :init-pose)
-  ;(send *irtviewer* :draw-objects) ; update view instead of click
+  ;(send *irtviewer* :draw-objects)
   (send *hrp2w* :reset-pose)
-  ;(send *irtviewer* :draw-objects) ; update view instead of click
+  ;(send *irtviewer* :draw-objects)
   (send *hrp2w* :reset-manip-pose)
   (send *hrp2w* :fix-leg-to-coords (make-coords))
   ; (valve-setup)
   (send *irtviewer* :draw-objects) ; update view instead of click
 )
 
-(defun joint-command
+(defun test-joint-command
   ()
   (send *ri* :angle-vector (send *hrp2w* :angle-vector) 3000)
   (send *ri* :wait-interpolation))
@@ -48,14 +48,15 @@
 
 ;; IK practice (Inverse Kinematics)
 (defun ik-practice
-  ()
+  (pos)
   (setq *co* (send (send *hrp2w* :rarm :end-coords) :copy-worldcoords))
   (send *co* :translate #f(250 0 0)) ; needs constrants for y and z
   (send *hrp2w* ; hrp2w
 	:rarm ; right arm
 	:inverse-kinematics ; inverse-kinematics
-	(make-coords :pos (send *co* :pos)) ; make coords
-	:rotational-axis #f((deg2rad -90) 0 0))) ; rotational-axis: yaw-pitch-roll
+	(make-coords :pos pos) ; make coords
+	:rotational-axis nil)) ; rotational-axis: yaw-pitch-roll
+; difference between float-vector and #f
 
 (defun neck-move
   ()
@@ -98,6 +99,26 @@
 	      (return)) ; exit from while loop
 	    (setq x (+ x x-diff))
 	    ))))
+
+(defun tf-setup ()
+  (setq *tfl* (instance ros::transform-listener :init))
+  (send *tfl* :wait-for-transform "/CHEST_LINK0"
+        "/camera_remote/depth_registered/cluster_decomposeroutput01" (ros::time 0) 1)
+  ;; (send *tfl* :lookup-transform "/CHEST_LINK0"
+  ;;       "/camera_remote/depth_registered/cluster_decomposeroutput01"
+  ;;       (ros::time 0))
+  )
+
+(defun tf-ik ()
+  (setq *torso-co* (send (car send *hrp2w* :torso)) :copy-worldcoords)
+  (setq *tfl* (instance ros::transform-listener :init))
+  (setq *target-co*
+        (send *tfl* :lookup-transform
+              "/CHEST_LINK0"
+              "/camera_remote/depth_registered/cluster_decomposeroutput01"
+              (ros::time 0)))
+  (setq *ik-target* (send *torso-co* :transform *target-co*))
+  )
 
 ;; show instruction
 (warn "~%push any key to start~%") ; Error Message
@@ -151,3 +172,6 @@
 ; 2. 手先でバルブを回してみる
 ; 3. 腕の関節を任意で固定してバルブを回してみる
 ; 4. 認識を入れる?
+
+; make-cube
+; (setq *cube* (make-cube 100 100 100))

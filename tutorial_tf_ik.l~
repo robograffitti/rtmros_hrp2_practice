@@ -1,0 +1,7 @@
+#!/usr/bin/env roseus
+(setq *torso-co* (send (car send *hrp2* :torso)) :copy-worldcoords)
+(setq *target-co*
+      (send *tfl* :lookup-transform
+      "CHEST_LINK_0"
+      "/camera_remote/depth_registered/cluster_decomposeroutput01"
+      (ros::time 0)))
