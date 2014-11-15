@@ -19,7 +19,10 @@
 ;; (setq *msg* nil)
 (defun cp-cb (msg)
   (setq *msg* msg)
-  (format t "~A~%" (list (send *msg* :point :x) (send *msg* :point :y) (send *msg* :point :z)))
+  (setq *clicked-point* (float-vector (send *msg* :point :x)
+                                      (send *msg* :point :y)
+                                      (send *msg* :point :z)))
+  (format t "~A~%" *clicked-point*)
   )
 (setq *msg* nil)
 
@@ -58,4 +61,5 @@
  (ros::spin-once)
  )
 (do-until-key
+ 
  (ros::spin-once))
