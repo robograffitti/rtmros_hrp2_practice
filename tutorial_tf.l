@@ -18,11 +18,22 @@
 ;; (defun tf-cb (msg) (setq *msg* msg) (format t "In tf-callback ~%"))
 ;; (setq *msg* nil)
 (defun cp-cb (msg)
+  (format t "in cp-cb~%")
   (setq *msg* msg)
-  (setq *clicked-point* (float-vector (send *msg* :point :x)
-                                      (send *msg* :point :y)
-                                      (send *msg* :point :z)))
-  (format t "~A~%" *clicked-point*)
+  (setq *clicked-pt* (make-coords))
+  (send *clicked-pt* :locate (float-vector (* 1000 (send *msg* :point :x))
+                                           (* 1000 (send *msg* :point :y))
+                                           (* 1000 (send *msg* :point :z))))
+  (format t "~A~%" *clicked-pt*)
+  ;; (setq *torso-co* (send (car (send *hrp2w* :torso)) :copy-worldcoords))
+  (setq *rarm-end* (send *hrp2w* :rarm :end-coords :copy-worldcoords))
+  (setq *ik-target* (send *rarm-end* :transform *clicked-pt*))
+  (send *rarm-end* :locate (send *ik-target* :pos) :world)
+  (send *rarm-end* :translate #f(-100 300 -50))
+  (format t "~A~%" *rarm-end*)
+  ;; Add 1 more to check *rarm-end* is t or nil
+  (send *hrp2w* :larm :inverse-kinematics *rarm-end*
+        :rotational-axis nil :debug-view t :torso nil)
   )
 (setq *msg* nil)
 
@@ -61,5 +72,5 @@
  (ros::spin-once)
  )
 (do-until-key
- 
+ ;; (format t "Waiting for your click!~%")
  (ros::spin-once))
