@@ -7,7 +7,9 @@
   (send *hrp2w* :reset-manip-pose)
   (send *hrp2w* :fix-leg-to-coords (make-coords))
   (send *irtviewer* :draw-objects)
+  )
 
+(defun move-robot
   (send *ri* :angle-vector (send *hrp2w* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
   )
@@ -20,26 +22,24 @@
                                            (* 1000 (send *msg* :point :y))
                                            (* 1000 (send *msg* :point :z))))
   (setq *ik-target* (send *torso-co* :transform *clicked-pt*))
+  (setq *rarm-end* (send *hrp2w* :rarm :end-coords :copy-worldcoords))
   (send *rarm-end* :locate (send *ik-target* :pos) :world)
   (send *rarm-end* :translate #f(0 0 0))
   (format t "~A~%" *rarm-end*)
 
-  (send *hrp2w* :rarm :inverse-kinematics *rarm-end*
-        :rotational-axis nil :debug-view t :torso nil)
   ;; (send *hrp2w* :rarm :inverse-kinematics *rarm-end*
-  ;;       :rotational-axis nil :debug-view t :torso nil
-  ;;       :link-list (send *hrp2w* :link-list
-  ;;                        (send *hrp2w* :rarm :end-coords :parent)
-  ;;                        (car (send *hrp2w* :torso :links)))
-
-  (send *ri* :angle-vector (send *hrp2w* :angle-vector) 3000)
-  (send *ri* :wait-interpolation)
+  ;;       :rotation-axis nil :debug-view t)
+  (send *hrp2w* :rarm :inverse-kinematics *rarm-end*
+        :rotation-axis nil :debug-view t :torso nil
+        :link-list (send *hrp2w* :link-list
+                         (send *hrp2w* :rarm :end-coords :parent)
+                         (car (send *hrp2w* :torso :links))))
   )
 (setq *msg* nil)
 
 (preparation)
 (ros::roseus "clicked_point_ik")
-(ros::subscribe "clicked_point" geometry_msgs::PointStamped #'cp-cb)
+(ros::subscribe "clicked_point" geometry_msgs::PointStamped #'clicked-pt-cb)
 
 (do-until-key
  (ros::spin-once)
