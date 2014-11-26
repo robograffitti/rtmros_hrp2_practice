@@ -1,5 +1,6 @@
 #!/usr/bin/env roseus
-(load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2w-interface.l") ; eusLisp robot interface
+(load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2w-interface.l")
+; eusLisp robot interface
 
 ;; methods of pose
 ; :reset-pose :reset-manip-pose :init-pose
