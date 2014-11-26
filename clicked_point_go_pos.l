@@ -1,5 +1,6 @@
 #!/usr/bin/env roseus
 (load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2w-interface.l")
+
 (defun preparation
   ()
   (hrp2w-init)
@@ -26,10 +27,12 @@
   (setq *rarm-end* (send *hrp2w* :rarm :end-coords :copy-worldcoords))
   (send *rarm-end* :locate (send *ik-target* :pos) :world)
   (send *rarm-end* :translate #f(0 0 0))
-  (format t "~A~%" *rarm-end*)
 
-  ;; (send *hrp2w* :rarm :inverse-kinematics *rarm-end*
-  ;;       :rotation-axis nil :debug-view t)
+  ;; go-pos for *vmax*
+  (send *vmax* :go-pos-relative-unsafe
+        (- (elt (send *rarm-end* :pos) 0) 150) (elt (send *rarm-end* :pos) 1) 0 10)
+  (send *vmax* :wait-interpolation)
+
   (send *hrp2w* :rarm :inverse-kinematics *rarm-end*
         :rotation-axis nil
         :debug-view t :torso nil
