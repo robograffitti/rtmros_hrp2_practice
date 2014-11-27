@@ -29,11 +29,14 @@
   (send *rarm-end* :translate #f(0 0 0))
 
   ;; go-pos for *vmax*
-  (send *vmax* :go-pos-relative-unsafe
-        (- (elt (send *rarm-end* :pos) 0) 300)
-        (elt (send *rarm-end* :pos) 1)
-        0 ;; no twist angle
-        (* 10 (norm (send *rarm-end* :pos))))
+  (setq x (- (elt (send *rarm-end* :pos) 0) 300))
+  (setq y (elt (send *rarm-end* :pos) 1))
+  (setq v (* 10 (norm (send *rarm-end* :pos))))
+  ;; broadcast tf or visualize a marker
+
+  (format t "Press ENTER to go pos at x=~Amm y=~Amm v=~Amsec~%" x y v)
+  (read-line)
+  (send *vmax* :go-pos-relative-unsafe x y v 0)
   (send *vmax* :wait-interpolation)
 
   (send *hrp2w* :rarm :inverse-kinematics *rarm-end*
@@ -48,8 +51,8 @@
 (preparation)
 (format t "Press ENTER to reset-manip-pose!~%")
 (read-line)
-(move-robot)
-(ros::roseus "clicked_point_ik")
+;; (move-robot)
+(ros::roseus "clicked_point_go_pos_ik")
 (ros::subscribe "clicked_point" geometry_msgs::PointStamped #'clicked-pt-cb)
 
 (do-until-key

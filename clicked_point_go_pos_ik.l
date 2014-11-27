@@ -1,5 +1,7 @@
 #!/usr/bin/env roseus
 (load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2w-interface.l")
+(ros::roseus "go_pos_point")
+(ros::advertise "/go_pos_point" geometry_msgs::PointStamped 1)
 
 (defun preparation
   ()
@@ -29,11 +31,21 @@
   (send *rarm-end* :translate #f(0 0 0))
 
   ;; go-pos for *vmax*
-  (send *vmax* :go-pos-relative-unsafe
-        (- (elt (send *rarm-end* :pos) 0) 300)
-        (elt (send *rarm-end* :pos) 1)
-        0 ;; no twist angle
-        (* 10 (norm (send *rarm-end* :pos))))
+  (setq x (- (elt (send *rarm-end* :pos) 0) 300))
+  (setq y (elt (send *rarm-end* :pos) 1))
+  (setq v (* 10 (norm (send *rarm-end* :pos))))
+  (setq header (instance std_msgs::header :init :stamp (ros::time-now) :frame_id "base_vmax"))
+  (setq point (instance geometry_msgs::Point :init :x (* 0.001 x) :y (* 0.001 y) :z 0))
+  (setq *point-stamped* (instance geometry_msgs::PointStamped :init :header header :point point))
+  (ros::publish "/go_pos_point" *point-stamped*)
+
+  (format t "Press ENTER to go pos at x=~Am y=~Am v=~Asec~%"
+          (send *point-stamped* :point :x)
+          (send *point-stamped* :point :y)
+          (* 0.001 v))
+  (read-line)
+
+  (send *vmax* :go-pos-relative-unsafe x y v 0)
   (send *vmax* :wait-interpolation)
 
   (send *hrp2w* :rarm :inverse-kinematics *rarm-end*
@@ -48,8 +60,8 @@
 (preparation)
 (format t "Press ENTER to reset-manip-pose!~%")
 (read-line)
-(move-robot)
-(ros::roseus "clicked_point_ik")
+;; (move-robot)
+(ros::roseus "clicked_point_go_pos_ik")
 (ros::subscribe "clicked_point" geometry_msgs::PointStamped #'clicked-pt-cb)
 
 (do-until-key
