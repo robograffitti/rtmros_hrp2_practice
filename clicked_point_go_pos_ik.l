@@ -9,11 +9,13 @@
   (objects *hrp2w*)
   (send *hrp2w* :reset-manip-pose)
   (send *hrp2w* :fix-leg-to-coords (make-coords))
+  (send *hrp2w* :head-neck-p :joint-angle 15)
   (send *irtviewer* :draw-objects)
   )
 
 (defun move-robot
   ()
+  (format t "WARN: HRP2-w moves!!!!~%")
   (send *ri* :angle-vector (send *hrp2w* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
   )
@@ -33,7 +35,9 @@
   ;; go-pos for *vmax*
   (setq x (- (elt (send *rarm-end* :pos) 0) 300))
   (setq y (elt (send *rarm-end* :pos) 1))
-  (setq v (* 10 (norm (send *rarm-end* :pos))))
+  (setq t (* 10 (norm (send *rarm-end* :pos)))) ;; duration depending on distance
+
+  ;; PointStamped
   (setq header (instance std_msgs::header :init :stamp (ros::time-now) :frame_id "base_vmax"))
   (setq point (instance geometry_msgs::Point :init :x (* 0.001 x) :y (* 0.001 y) :z 0))
   (setq *point-stamped* (instance geometry_msgs::PointStamped :init :header header :point point))
@@ -42,12 +46,13 @@
   (format t "Press ENTER to go pos at x=~Am y=~Am v=~Asec~%"
           (send *point-stamped* :point :x)
           (send *point-stamped* :point :y)
-          (* 0.001 v))
+          (* 0.001 t))
   (read-line)
 
-  (send *vmax* :go-pos-relative-unsafe x y v 0)
+  (send *vmax* :go-pos-relative-unsafe x y 0 t)
   (send *vmax* :wait-interpolation)
 
+  ;; need conditional branch if IK fails
   (send *hrp2w* :rarm :inverse-kinematics *rarm-end*
         :rotation-axis nil
         :debug-view t :torso nil
@@ -58,9 +63,11 @@
 (setq *msg* nil)
 
 (preparation)
-(format t "Press ENTER to reset-manip-pose!~%")
-(read-line)
-;; (move-robot)
+(format t "Press y to reset-manip-pose!~%")
+(setq ans (read-line)) ;; for safety
+(if (or (equal ans "y") (equal ans "Y"))
+    (move-robot))
+
 (ros::roseus "clicked_point_go_pos_ik")
 (ros::subscribe "clicked_point" geometry_msgs::PointStamped #'clicked-pt-cb)
 
