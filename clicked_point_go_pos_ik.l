@@ -1,7 +1,7 @@
 #!/usr/bin/env roseus
 (load "package://hrpsys_ros_bridge_tutorials/euslisp/hrp2w-interface.l")
-(ros::roseus "go_pos_point")
-(ros::advertise "/go_pos_point" geometry_msgs::PointStamped 1)
+(ros::roseus "go_pos_pt")
+(ros::advertise "/go_pos_pt" geometry_msgs::PointStamped 1)
 
 (defun preparation
   ()
@@ -34,10 +34,12 @@
   (setq y (elt (send *nav-pt* :pos) 1))
   (setq t (* 10 (norm (send *nav-pt* :pos)))) ;; duration depending on distance
 
-  ;; PointStamped
+  ;; need codes to get orientation from msg here
+
+  ;; PointStamped for debugging
   (setq header (instance std_msgs::header :init :stamp (ros::time-now) :frame_id "CHEST_LINK0"))
   (setq pt (instance geometry_msgs::Point :init :x (* 0.001 x) :y (* 0.001 y) :z 0))
-  (setq *pt-stamped* (instance geometry_msgs::PointStamped :init :header header :point pt))
+  (setq *point-stamped* (instance geometry_msgs::PointStamped :init :header header :point pt))
   (ros::publish "/go_pos_pt" *point-stamped*)
 
   (format t "Press ENTER to go pos at x=~Am y=~Am v=~Asec~%"
@@ -47,7 +49,7 @@
   (read-line)
 
   (send *vmax* :go-pos-relative-unsafe x y 0 t)
-  (send *vmax* :wait-interpolation)
+  (send *vmax* :wait-interpolation) ;; for safety
   )
 
 (defun clicked-pt-cb (msg)
@@ -69,6 +71,7 @@
         :link-list (send *hrp2w* :link-list
                          (send *hrp2w* :rarm :end-coords :parent)
                          (car (send *hrp2w* :torso :links))))
+  (send *hrp2w* :wait-interpolation) ;; for safety
   )
 
 (setq *msg* nil)
