@@ -20,6 +20,36 @@
   (send *ri* :wait-interpolation)
   )
 
+(defun 2d-nav-goal-cb (msg)
+  (setq *msg* msg)
+  (setq *torso-co* (send (car (send *hrp2w* :torso)) :copy-worldcoords))
+  (setq *nav-goal* (make-coords))
+  (send *nav-goal* :locate (float-vector (* 1000 (send *msg* :pose :position :x))
+                                         (* 1000 (send *msg* :pose :position :y))
+                                         (* 1000 (send *msg* :pose :position :z))))
+  (send *nav-pt* (send *torso-co* :transform *nav-goal*))
+
+  ;; go-pos for *vmax*
+  (setq x (- (elt (send *nav-pt* :pos) 0) 300))
+  (setq y (elt (send *nav-pt* :pos) 1))
+  (setq t (* 10 (norm (send *nav-pt* :pos)))) ;; duration depending on distance
+
+  ;; PointStamped
+  (setq header (instance std_msgs::header :init :stamp (ros::time-now) :frame_id "CHEST_LINK0"))
+  (setq pt (instance geometry_msgs::Point :init :x (* 0.001 x) :y (* 0.001 y) :z 0))
+  (setq *pt-stamped* (instance geometry_msgs::PointStamped :init :header header :point pt))
+  (ros::publish "/go_pos_pt" *point-stamped*)
+
+  (format t "Press ENTER to go pos at x=~Am y=~Am v=~Asec~%"
+          (send *point-stamped* :point :x)
+          (send *point-stamped* :point :y)
+          (* 0.001 t))
+  (read-line)
+
+  (send *vmax* :go-pos-relative-unsafe x y 0 t)
+  (send *vmax* :wait-interpolation)
+  )
+
 (defun clicked-pt-cb (msg)
   (setq *msg* msg)
   (setq *torso-co* (send (car (send *hrp2w* :torso)) :copy-worldcoords))
@@ -32,26 +62,6 @@
   (send *rarm-end* :locate (send *ik-target* :pos) :world)
   (send *rarm-end* :translate #f(0 0 0))
 
-  ;; go-pos for *vmax*
-  (setq x (- (elt (send *rarm-end* :pos) 0) 300))
-  (setq y (elt (send *rarm-end* :pos) 1))
-  (setq t (* 10 (norm (send *rarm-end* :pos)))) ;; duration depending on distance
-
-  ;; PointStamped
-  (setq header (instance std_msgs::header :init :stamp (ros::time-now) :frame_id "base_vmax"))
-  (setq point (instance geometry_msgs::Point :init :x (* 0.001 x) :y (* 0.001 y) :z 0))
-  (setq *point-stamped* (instance geometry_msgs::PointStamped :init :header header :point point))
-  (ros::publish "/go_pos_point" *point-stamped*)
-
-  (format t "Press ENTER to go pos at x=~Am y=~Am v=~Asec~%"
-          (send *point-stamped* :point :x)
-          (send *point-stamped* :point :y)
-          (* 0.001 t))
-  (read-line)
-
-  (send *vmax* :go-pos-relative-unsafe x y 0 t)
-  (send *vmax* :wait-interpolation)
-
   ;; need conditional branch if IK fails
   (send *hrp2w* :rarm :inverse-kinematics *rarm-end*
         :rotation-axis nil
@@ -60,6 +70,7 @@
                          (send *hrp2w* :rarm :end-coords :parent)
                          (car (send *hrp2w* :torso :links))))
   )
+
 (setq *msg* nil)
 
 (preparation)
@@ -70,6 +81,7 @@
 
 (ros::roseus "clicked_point_go_pos_ik")
 (ros::subscribe "clicked_point" geometry_msgs::PointStamped #'clicked-pt-cb)
+(ros::subsrcibe "move_base_simple/goal" geometry_msgs/PoseStamped #'2d-nav-goal-cb)
 
 (do-until-key
  (ros::spin-once)
