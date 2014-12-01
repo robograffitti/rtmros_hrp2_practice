@@ -27,7 +27,7 @@
   (send *nav-goal* :locate (float-vector (* 1000 (send *msg* :pose :position :x))
                                          (* 1000 (send *msg* :pose :position :y))
                                          (* 1000 (send *msg* :pose :position :z))))
-  (send *nav-pt* (send *torso-co* :transform *nav-goal*))
+  (setq *nav-pt* (send *torso-co* :transform *nav-goal*))
 
   ;; go-pos for *vmax*
   (setq x (- (elt (send *nav-pt* :pos) 0) 300))
