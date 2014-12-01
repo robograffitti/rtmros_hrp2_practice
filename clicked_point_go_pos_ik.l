@@ -84,7 +84,7 @@
 
 (ros::roseus "clicked_point_go_pos_ik")
 (ros::subscribe "clicked_point" geometry_msgs::PointStamped #'clicked-pt-cb)
-(ros::subscribe "move_base_simple/goal" geometry_msgs/PoseStamped #'2d-nav-goal-cb)
+(ros::subscribe "move_base_simple/goal" geometry_msgs::PoseStamped #'2d-nav-goal-cb)
 
 (do-until-key
  (ros::spin-once)
