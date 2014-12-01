@@ -27,6 +27,9 @@
   (send *nav-goal* :locate (float-vector (* 1000 (send *msg* :pose :position :x))
                                          (* 1000 (send *msg* :pose :position :y))
                                          (* 1000 (send *msg* :pose :position :z))))
+  ;; set rotation from msg to nav-goal here
+
+
   (format t "~A~%" *nav-goal*)
   (setq *nav-pt* (send *torso-co* :transform *nav-goal*))
   (format t "~A~%" *nav-pt*)
@@ -34,9 +37,7 @@
   ;; go-pos for *vmax*
   (setq x (- (elt (send *nav-pt* :pos) 0) 300))
   (setq y (elt (send *nav-pt* :pos) 1))
-  (setq duration (* 10 (norm (send *nav-pt* :pos)))) ;; duration depending on distance
-
-  ;; need codes to get orientation from msg here
+  (setq dt (* 10 (norm (send *nav-pt* :pos)))) ;; duration depending on distance
 
   ;; PointStamped for debugging
   (setq header (instance std_msgs::header :init :stamp (ros::time-now) :frame_id "CHEST_LINK0"))
@@ -47,10 +48,10 @@
   (format t "Press ENTER to go pos at x=~Am y=~Am v=~Asec~%"
           (send *point-stamped* :point :x)
           (send *point-stamped* :point :y)
-          (* 0.001 duration))
+          (* 0.001 dt))
   (read-line)
 
-  (send *vmax* :go-pos-relative-unsafe x y 0 duration)
+  (send *vmax* :go-pos-relative-unsafe x y 0 dt)
   (send *vmax* :wait-interpolation) ;; for safety
   )
 
