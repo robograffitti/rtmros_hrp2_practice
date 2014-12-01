@@ -24,6 +24,7 @@
   (setq *msg* msg)
   (setq *torso-co* (send (car (send *hrp2w* :torso)) :copy-worldcoords))
   (setq *nav-goal* (make-coords))
+  (*nav-goal*)
   (send *nav-goal* :locate (float-vector (* 1000 (send *msg* :pose :position :x))
                                          (* 1000 (send *msg* :pose :position :y))
                                          (* 1000 (send *msg* :pose :position :z))))
@@ -32,7 +33,7 @@
   ;; go-pos for *vmax*
   (setq x (- (elt (send *nav-pt* :pos) 0) 300))
   (setq y (elt (send *nav-pt* :pos) 1))
-  (setq t #f(* 10 (norm (send *nav-pt* :pos)))) ;; duration depending on distance
+  (setq t (* 10 (norm (send *nav-pt* :pos)))) ;; duration depending on distance
 
   ;; need codes to get orientation from msg here
 
