@@ -24,11 +24,12 @@
   (setq *msg* msg)
   (setq *torso-co* (send (car (send *hrp2w* :torso)) :copy-worldcoords))
   (setq *nav-goal* (make-coords))
-  (format t "~A~%" *nav-goal*)
   (send *nav-goal* :locate (float-vector (* 1000 (send *msg* :pose :position :x))
                                          (* 1000 (send *msg* :pose :position :y))
                                          (* 1000 (send *msg* :pose :position :z))))
+  (format t "~A~%" *nav-goal*)
   (setq *nav-pt* (send *torso-co* :transform *nav-goal*))
+  (format t "~A~%" *nav-pt*)
 
   ;; go-pos for *vmax*
   (setq x (- (elt (send *nav-pt* :pos) 0) 300))
