@@ -32,7 +32,7 @@
   ;; go-pos for *vmax*
   (setq x (- (elt (send *nav-pt* :pos) 0) 300))
   (setq y (elt (send *nav-pt* :pos) 1))
-  (setq t (* 10 (norm (send *nav-pt* :pos)))) ;; duration depending on distance
+  (setq t #f(* 10 (norm (send *nav-pt* :pos)))) ;; duration depending on distance
 
   ;; need codes to get orientation from msg here
 
