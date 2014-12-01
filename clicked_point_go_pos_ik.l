@@ -34,7 +34,7 @@
   ;; go-pos for *vmax*
   (setq x (- (elt (send *nav-pt* :pos) 0) 300))
   (setq y (elt (send *nav-pt* :pos) 1))
-  (setq t (* 10 (norm (send *nav-pt* :pos)))) ;; duration depending on distance
+  (setq duration (* 10 (norm (send *nav-pt* :pos)))) ;; duration depending on distance
 
   ;; need codes to get orientation from msg here
 
@@ -47,10 +47,10 @@
   (format t "Press ENTER to go pos at x=~Am y=~Am v=~Asec~%"
           (send *point-stamped* :point :x)
           (send *point-stamped* :point :y)
-          (* 0.001 t))
+          (* 0.001 duration))
   (read-line)
 
-  (send *vmax* :go-pos-relative-unsafe x y 0 t)
+  (send *vmax* :go-pos-relative-unsafe x y 0 duration)
   (send *vmax* :wait-interpolation) ;; for safety
   )
 
