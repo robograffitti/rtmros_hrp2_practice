@@ -12,7 +12,7 @@
 
 (defun move-robot
   ()
-  (send *ri* :angle-vector (send *hrp2w* :angle-vector) 5000)
+  (send *ri* :angle-vector (send *hrp2w* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
   )
 
@@ -26,8 +26,7 @@
   (setq *ik-target* (send *torso-co* :transform *clicked-pt*))
   (setq *rarm-end* (send *hrp2w* :rarm :end-coords :copy-worldcoords))
   (send *rarm-end* :locate (send *ik-target* :pos) :world)
-  (setq *rarm-end-backup* (send *rarm-end* :copy-worldcoords))
-  (send *rarm-end* :translate #f(-75 -25 80)) ;; parameter x=-75 y=-25 z=80
+  (send *rarm-end* :translate #f(0 0 0))
   (format t "~A~%" *rarm-end*)
 
   ;; (send *hrp2w* :rarm :inverse-kinematics *rarm-end*
@@ -38,14 +37,12 @@
         :link-list (send *hrp2w* :link-list
                          (send *hrp2w* :rarm :end-coords :parent)
                          (car (send *hrp2w* :torso :links))))
-  (move-robot)
-  (exit)
   )
 (setq *msg* nil)
 
 (preparation)
-;;(format t "Press ENTER to reset-manip-pose!~%")
-;;(read-line)
+(format t "Press ENTER to reset-manip-pose!~%")
+(read-line)
 (move-robot)
 (ros::roseus "clicked_point_ik")
 (ros::subscribe "clicked_point" geometry_msgs::PointStamped #'clicked-pt-cb)
@@ -53,4 +50,3 @@
 (do-until-key
  (ros::spin-once)
  )
-(exit)
